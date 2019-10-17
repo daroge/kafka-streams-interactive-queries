@@ -1,0 +1,27 @@
+server:
+  port: 7890
+application:
+  name data-provider
+
+spring:
+  kafka:
+    topics:
+      flights-topic-name: flights
+    admin:
+      client-id: interactive-client
+      fail-fast: true
+    bootstrap-servers: 172.17.0.1:29092
+    producer:
+      acks: all
+      retries: 3
+      client-id: data-provider
+    properties:
+      retry.backoff.ms: 10000
+      reconnect.backoff.max.ms: 10000
+      request.timeout.ms: 3000
+  webClient:
+    base-url: https://opensky-network.org/api
+    all-uri: /states/all
+    connection:
+      connectionTimeout: 20000
+      readTimeout: 20000

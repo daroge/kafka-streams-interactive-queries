@@ -1,0 +1,34 @@
+server:
+  port: 7070
+
+spring:
+  kafka:
+    bootstrap-servers:
+      - 172.17.0.1:29093
+    consumer:
+      auto-offset-reset: earliest
+    streams:
+      bootstrap-servers: 172.17.0.1:29093
+      client-id: interactive-query-streams
+      application-id: interactive-query
+      replication-factor: 3
+    properties:
+      cache.max.bytes.buffering: 10485760
+      application.server: localhost:7070
+
+logging:
+  level:
+    root: info
+
+application:
+  name: interactive-query
+  kafka:
+    topics:
+      flight-topic-name: flights
+    stores:
+      flight-store-name: flight-count
+    streams:
+      port: 7070
+      server: 172.17.0.1
+  web:
+    country-count-uri: "/countFrom/{country}"
