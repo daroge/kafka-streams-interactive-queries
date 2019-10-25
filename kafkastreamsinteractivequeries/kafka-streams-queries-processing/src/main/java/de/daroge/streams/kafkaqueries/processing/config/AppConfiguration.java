@@ -8,6 +8,7 @@ import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.DescribeClusterResult;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
@@ -29,6 +30,7 @@ import org.springframework.kafka.annotation.KafkaStreamsDefaultConfiguration;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
 import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.kafka.support.serializer.JsonSerde;
+import org.springframework.util.StringUtils;
 
 import java.net.UnknownHostException;
 import java.time.Duration;
@@ -41,23 +43,11 @@ import java.util.Map;
 public
 class AppConfiguration {
 
-    @Value("${spring.kafka.bootstrap-server}")
-    private String bootstrapServer;
-
-    @Value("${application.name}")
-    private String applicationName;
-
     @Value("${application.kafka.topics.flight-topic-name}")
     private String topicName;
 
     @Value("${application.kafka.stores.flight-store-name}")
     private String storeName;
-
-    @Value("${application.kafka.streams.port}")
-    private int serverPort;
-
-    @Value("${application.kafka.streams.server}")
-    private String serverAddress;
 
     @Value("${spring.kafka.properties.application.server}")
     private String applicationServer;
@@ -67,26 +57,28 @@ class AppConfiguration {
 
     @Autowired private KafkaProperties kafkaProperties;
 
-    @Autowired
-    private KafkaAdmin admin;
+    @Bean
+    public KafkaAdmin admin(){
+        Map<String,Object> configs = new HashMap<>();
+        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
+                StringUtils.collectionToCommaDelimitedString(kafkaProperties.getBootstrapServers()));
+        return new KafkaAdmin(configs);
+    }
 
     @Bean(name = KafkaStreamsDefaultConfiguration.DEFAULT_STREAMS_CONFIG_BEAN_NAME)
     public KafkaStreamsConfiguration streamsConfig() {
 
-        Map<String, Object> props = new HashMap<>();;
+        Map<String, Object> props = kafkaProperties.buildStreamsProperties();
         setReplicationFactor(props);
         props.put(StreamsConfig.APPLICATION_SERVER_CONFIG,applicationServer);
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, kafkaProperties.getStreams().getApplicationId());
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,kafkaProperties.getStreams().getBootstrapServers());
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,kafkaProperties.getConsumer().getAutoOffsetReset());
         return new  KafkaStreamsConfiguration(props);
     }
 
     private void setReplicationFactor(Map<String, Object> props) {
-        AdminClient client = AdminClient.create(admin.getConfig());
+        AdminClient client = AdminClient.create(admin().getConfig());
         DescribeClusterResult clusterResult = client.describeCluster();
         int clusterSize = Try.of(() -> clusterResult.nodes().get().size()).getOrElse(1);
-        if (clusterSize > 3) props.put(StreamsConfig.REPLICATION_FACTOR_CONFIG,replicationFactor);
+        if (clusterSize >= 2) props.put(StreamsConfig.REPLICATION_FACTOR_CONFIG,replicationFactor);
         else  props.put(StreamsConfig.REPLICATION_FACTOR_CONFIG,clusterSize) ; // for internal topic
 
     }
@@ -106,6 +98,7 @@ class AppConfiguration {
 
     @Bean
     HostInfo hostInfo() {
-        return new HostInfo(serverAddress,serverPort);
+        String[] parts = applicationServer.split(":");
+        return new HostInfo(parts[0], Integer.parseInt(parts[1]));
     }
 }

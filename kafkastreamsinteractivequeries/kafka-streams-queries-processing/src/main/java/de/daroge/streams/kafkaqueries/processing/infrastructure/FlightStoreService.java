@@ -50,7 +50,7 @@ public class FlightStoreService {
     }
 
     public Mono<Long> getFlightsCountForKey(String key){
-        HostInformation hostStoreInfo = kafkaStoreMetaDataService.hostInfoForStoreAndKey(flightStoreName,key, new StringSerializer());
+        HostInformation hostStoreInfo = kafkaStoreMetaDataService.hostInfoForStoreAndKey(flightStoreName, key, new StringSerializer());
         if ( Objects.isNull(hostStoreInfo) ) return Mono.empty();
         if(!hostStoreInfo.isEquivalentTo(hostInfo)){
             return getFlightsCountFromRemoteStore(hostStoreInfo,key);
@@ -78,7 +78,7 @@ public class FlightStoreService {
                         .build(countryName))
                 .retrieve()
                 .bodyToMono(Long.class)
-                .retryWhen(reactor.retry.Retry.any().retryMax(2).backoff(Backoff.fixed(Duration.ofMillis(2000))));
+                .retryWhen(reactor.retry.Retry.any().retryMax(5).backoff(Backoff.fixed(Duration.ofMillis(2000))));
     }
 
 }

@@ -3,12 +3,10 @@ server:
 
 spring:
   kafka:
-    bootstrap-servers:
-      - 172.17.0.1:29093
+    bootstrap-servers: localhost:29092,localhost:29093,localhost:29094
     consumer:
       auto-offset-reset: earliest
     streams:
-      bootstrap-servers: 172.17.0.1:29093
       client-id: interactive-query-streams
       application-id: interactive-query
       replication-factor: 3
@@ -27,8 +25,5 @@ application:
       flight-topic-name: flights
     stores:
       flight-store-name: flight-count
-    streams:
-      port: 7070
-      server: 172.17.0.1
   web:
     country-count-uri: "/countFrom/{country}"

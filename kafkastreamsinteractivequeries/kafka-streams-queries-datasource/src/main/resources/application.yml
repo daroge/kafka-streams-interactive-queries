@@ -7,10 +7,7 @@ spring:
   kafka:
     topics:
       flights-topic-name: flights
-    admin:
-      client-id: interactive-client
-      fail-fast: true
-    bootstrap-servers: 172.17.0.1:29092
+    bootstrap-servers: localhost:29092,localhost:29093,localhost:29094
     producer:
       acks: all
       retries: 3
@@ -18,7 +15,7 @@ spring:
     properties:
       retry.backoff.ms: 10000
       reconnect.backoff.max.ms: 10000
-      request.timeout.ms: 3000
+      request.timeout.ms: 5000
   webClient:
     base-url: https://opensky-network.org/api
     all-uri: /states/all

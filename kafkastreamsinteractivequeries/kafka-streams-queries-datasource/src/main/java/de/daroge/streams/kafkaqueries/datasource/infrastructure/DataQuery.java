@@ -34,22 +34,22 @@ public class DataQuery {
 
     public DataQuery(WebClient.Builder clientBuilder){
 
-        log.info("constructing the dataQuery");
+        log.info("constructing the webClient");
 
-        WebClient webClient = clientBuilder.clientConnector(
+        this.webClient  = clientBuilder.clientConnector(
                 new ReactorClientHttpConnector(HttpClient.create()
                         .tcpConfiguration(tcpClient -> tcpClient.option(
                                 ChannelOption.CONNECT_TIMEOUT_MILLIS,2000)
                                 .doOnConnected(connection -> connection.addHandlerLast(new ReadTimeoutHandler(3000))))))
                 .build();
-        this.webClient = webClient;
     }
 
     public Mono<Flight> getAll(){
 
+        log.info("collecting current flight status");
         URI uri = UriComponentsBuilder.fromUriString(baseUrl+allUri).build().toUri();
         Retry<?> retry = Retry.any() //
-                .retryMax(2) //
+                .retryMax(3) //
                 .backoff(Backoff.fixed(Duration.ofMillis(2000)));
         Mono<Flight> response = webClient
                 .get()
@@ -57,9 +57,7 @@ public class DataQuery {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(Flight.class)
-                .retryWhen(retry)
-                .log();
-        log.info("collecting all states vectors");
+                .retryWhen(retry);
         return response;
     }
 

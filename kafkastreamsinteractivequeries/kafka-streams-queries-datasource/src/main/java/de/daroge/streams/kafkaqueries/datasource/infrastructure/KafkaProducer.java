@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.kafka.sender.KafkaSender;
+import reactor.kafka.sender.SenderRecord;
 import reactor.kafka.sender.SenderResult;
 
 import javax.annotation.PreDestroy;
@@ -23,7 +24,7 @@ public class KafkaProducer {
     private DataQuery dataQuery;
     private KafkaSender sender;
 
-    @Value("${spring.kafka.topic-name}")
+    @Value("${spring.kafka.topics.flights-topic-name}")
     private String topic;
 
     public KafkaProducer(DataQuery dataQuery, KafkaSender sender){
@@ -50,13 +51,15 @@ public class KafkaProducer {
 
     private Mono<SenderResult> send (FlightState stateVector){
 
+        log.info("new flight's information arrived: "+ stateVector.getIcao24());
         if (Objects.isNull(stateVector)) {
             log.info("no flight");
             return Mono.empty();
         }
-        Flux<SenderResult> result = sender.send(Mono.just(new
-                ProducerRecord<String, FlightState>(topic,stateVector.getOriginCountry(),stateVector)));
-        System.out.println(stateVector.getIcao24());
+        SenderRecord<String,FlightState,Object> senderRecord = SenderRecord.create(new
+                ProducerRecord<String, FlightState>(topic,stateVector.getOriginCountry(),stateVector),null);
+        Flux<SenderResult> result = sender.send(Mono.just(senderRecord));
+        log.info("flight's information successfully send to kafka: "+ stateVector.getIcao24());
         return result.next();
     }
 }
