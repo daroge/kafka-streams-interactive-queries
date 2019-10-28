@@ -3,7 +3,7 @@ server:
 
 spring:
   kafka:
-    bootstrap-servers: localhost:29092,localhost:29093,localhost:29094
+    bootstrap-servers: kafka:9092,kafka1:9093,kafka2:9094
     consumer:
       auto-offset-reset: earliest
     streams:

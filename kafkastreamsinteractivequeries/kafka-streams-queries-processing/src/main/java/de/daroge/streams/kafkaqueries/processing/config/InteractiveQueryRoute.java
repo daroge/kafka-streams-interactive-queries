@@ -19,7 +19,7 @@ public class InteractiveQueryRoute {
     private String countCountUri;
 
     public InteractiveQueryRoute(InteractiveQueryHandler interactiveQueryHandler,
-                                 @Value("${application.web.county-count-uri}") String countCountUri){
+                                 @Value("${application.web.country-count-uri}") String countCountUri){
         this.interactiveQueryHandler = interactiveQueryHandler;
         this.countCountUri = countCountUri;
     }

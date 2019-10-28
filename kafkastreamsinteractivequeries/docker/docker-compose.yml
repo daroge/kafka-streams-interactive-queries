@@ -18,6 +18,8 @@ services:
       - zookeeper
     ports:
       - "29092:29092"
+    expose:
+      - 9092
     environment:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
@@ -36,6 +38,8 @@ services:
       - zookeeper
     ports:
       - "29093:29093"
+    expose:
+      - 9093
     environment:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9093,PLAINTEXT_HOST://localhost:29093
@@ -54,6 +58,8 @@ services:
       - zookeeper
     ports:
       - "29094:29094"
+    expose:
+      - 9094
     environment:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9094,PLAINTEXT_HOST://localhost:29094
@@ -65,26 +71,18 @@ services:
       TZ: "${TZ-Europe/Berlin}"
 
   datasource:
-    image: daroge/kafka-queries-datasource
-    build:
-      context: ..
-      dockerfile: kafka-streams-queries-datasource/Dockerfile
-      args:
-        JAR_FILE: target/kafka-streams-queries-datasource-1.0-SNAPSHOT.jar
+    image: daroge.image/kafka-streams-queries-datasource:1.0
+    container_name: daroge-datasource
     depends_on:
       - kafka-topics-ui
 
   processing:
-    image: daroge/kafka-queries-processing
-    build:
-      context: ..
-      dockerfile: kafka-streams-queries-processing/Dockerfile
-      args:
-        JAR_FILE: target/kafka-streams-queries-processing-1.0-SNAPSHOT.jar
-    depends_on:
-      - datasource
+    image: daroge.image/kafka-streams-queries-processing:1.0
+    container_name: daroge-processing
     ports:
       - "7070:7070"
+    depends_on:
+      - datasource
 
   kafka-rest-proxy:
     image: confluentinc/cp-kafka-rest:latest
@@ -98,7 +96,7 @@ services:
     ports:
       - "8082:8082"
     environment:
-      KAFKA_REST_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:9093
+      KAFKA_REST_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092,PLAINTEXT://kafka1:9093
       KAFKA_REST_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_REST_HOST_NAME: "kafka-rest-proxy"
       KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"

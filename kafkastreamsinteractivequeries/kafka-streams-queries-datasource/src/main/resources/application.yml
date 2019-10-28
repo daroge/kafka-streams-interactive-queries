@@ -7,7 +7,7 @@ spring:
   kafka:
     topics:
       flights-topic-name: flights
-    bootstrap-servers: localhost:29092,localhost:29093,localhost:29094
+    bootstrap-servers: kafka:9092,kafka1:9093,kafka2:9094
     producer:
       acks: all
       retries: 3

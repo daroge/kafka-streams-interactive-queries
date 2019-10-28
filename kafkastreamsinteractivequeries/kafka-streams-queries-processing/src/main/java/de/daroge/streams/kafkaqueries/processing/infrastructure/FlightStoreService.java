@@ -27,15 +27,13 @@ public class FlightStoreService {
     private StreamsBuilderFactoryBean streamsBuilderFactoryBean;
     private KafkaStreams kafkaStreams;
     private WebClient webClient;
-    private Retry retry;
     private String countryCountUri;
     private String flightStoreName;
     private KafkaStoreMetaDataService kafkaStoreMetaDataService;
 
     @Autowired
     public FlightStoreService(HostInfo hostInfo,
-                              StreamsBuilderFactoryBean streamsBuilderFactoryBean,
-                              WebClient.Builder builder, Retry retry,
+                              StreamsBuilderFactoryBean streamsBuilderFactoryBean, WebClient.Builder builder,
                               @Value("${application.web.country-count-uri}")String countryCountUri,
                               @Value("${application.kafka.stores.flight-store-name}")String flightStoreName,
                               KafkaStoreMetaDataService kafkaStoreMetaDataService){
@@ -43,7 +41,6 @@ public class FlightStoreService {
         this.hostInfo = hostInfo;
         this.streamsBuilderFactoryBean = streamsBuilderFactoryBean;
         webClient = builder.build();
-        this.retry = retry;
         this.countryCountUri = countryCountUri;
         this.flightStoreName = flightStoreName;
         this.kafkaStoreMetaDataService = kafkaStoreMetaDataService;

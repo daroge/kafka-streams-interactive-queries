@@ -78,7 +78,7 @@ class AppConfiguration {
         AdminClient client = AdminClient.create(admin().getConfig());
         DescribeClusterResult clusterResult = client.describeCluster();
         int clusterSize = Try.of(() -> clusterResult.nodes().get().size()).getOrElse(1);
-        if (clusterSize >= 2) props.put(StreamsConfig.REPLICATION_FACTOR_CONFIG,replicationFactor);
+        if (clusterSize >= 3) props.put(StreamsConfig.REPLICATION_FACTOR_CONFIG,replicationFactor);
         else  props.put(StreamsConfig.REPLICATION_FACTOR_CONFIG,clusterSize) ; // for internal topic
 
     }

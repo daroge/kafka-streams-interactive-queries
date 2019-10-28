@@ -11,6 +11,7 @@
 
     <properties>
         <start-class>de.daroge.streams.kafkaqueries.processing.ProcessingEntryPoint</start-class>
+        <dockerfile-maven-version>1.4.9</dockerfile-maven-version>
     </properties>
 
     <artifactId>kafka-streams-queries-processing</artifactId>
@@ -59,6 +60,7 @@
     </dependencies>
 
     <build>
+        <finalName>kafka-streams-queries-processing-1.0</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -72,6 +74,26 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>${dockerfile-maven-version}</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <repository>daroge.image/kafka-streams-queries-processing</repository>
+                    <tag>1.0</tag>
+                    <buildArgs>
+                        <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+                    </buildArgs>
+                </configuration>
             </plugin>
         </plugins>
     </build>
